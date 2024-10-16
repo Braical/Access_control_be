@@ -1,0 +1,16 @@
+0000000000000000000000000000000000000000 e4994d83f5ae2f20dc02c6ddc926d4c1aaf23d9c jcarriquiry <jose_carriquiry@yahoo.com.ar> 1712293406 -0300	clone: from https://bitbucket.org/simplesolutionsarg/access-control-local-be.git
+e4994d83f5ae2f20dc02c6ddc926d4c1aaf23d9c 232dc69f63f121f8f77d5f0aad8beef44f8d853f jcarriquiry <jose_carriquiry@yahoo.com.ar> 1712293876 -0300	commit: version 2024-04-05
+232dc69f63f121f8f77d5f0aad8beef44f8d853f 232dc69f63f121f8f77d5f0aad8beef44f8d853f jcarriquiry <jose_carriquiry@yahoo.com.ar> 1713114493 -0300	checkout: moving from master to CU-86azzb772_FaceId-foto-local
+232dc69f63f121f8f77d5f0aad8beef44f8d853f 395a95fbd6ca571b19723af94d3c67e55772cf6d jcarriquiry <jose_carriquiry@yahoo.com.ar> 1713133477 -0300	commit: feat: Get image from local instead face id / Fix synchronizaton
+395a95fbd6ca571b19723af94d3c67e55772cf6d 232dc69f63f121f8f77d5f0aad8beef44f8d853f jcarriquiry <jose_carriquiry@yahoo.com.ar> 1718234058 -0300	checkout: moving from CU-86azzb772_FaceId-foto-local to master
+232dc69f63f121f8f77d5f0aad8beef44f8d853f f74c136061559b8a1883a437da8373b47be79b5e jcarriquiry <jose_carriquiry@yahoo.com.ar> 1718248988 -0300	pull: Fast-forward
+f74c136061559b8a1883a437da8373b47be79b5e 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1718249692 -0300	checkout: moving from master to CU-86b0txykk_fix_event_process
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723690757 -0300	checkout: moving from CU-86b0txykk_fix_event_process to CU-86b1m76b3_Error-Face-ID
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723690767 -0300	checkout: moving from CU-86b1m76b3_Error-Face-ID to CU-86b1m76b3_Error-Face-ID
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723690778 -0300	checkout: moving from CU-86b1m76b3_Error-Face-ID to develop
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723690786 -0300	checkout: moving from develop to CU-86b1m76b3_Error-Face-ID
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 f74c136061559b8a1883a437da8373b47be79b5e jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723690886 -0300	checkout: moving from CU-86b1m76b3_Error-Face-ID to master
+f74c136061559b8a1883a437da8373b47be79b5e 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723692795 -0300	checkout: moving from master to develop
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 62249e79e30b2bc4f3a2e662e9571a685fb261f7 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723693298 -0300	checkout: moving from develop to CU-86b0txykk_fix_event_process
+62249e79e30b2bc4f3a2e662e9571a685fb261f7 393c29b09897279837412bc3db87b39088cb09c0 jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723769305 -0300	commit: change event process
+393c29b09897279837412bc3db87b39088cb09c0 6c688f1d9b006150ddb8bd7123f71d4c7c55a61a jcarriquiry <jose_carriquiry@yahoo.com.ar> 1723770848 -0300	checkout: moving from CU-86b0txykk_fix_event_process to CU-86b1m76b3_Error-Process_Event
