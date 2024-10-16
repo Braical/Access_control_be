@@ -1,0 +1,389 @@
+#Nombre:.env-example
+
+ID_BARRIO = 426
+
+# Post name where de device is connected
+GUARD_POST_NAME=Your post name
+
+# Port where events are listened to
+PORT=3888
+
+# Every few minutes it synchronizes news, in milliseconds 60000 --> 1 minute
+# Set to 0 to disable synchronization
+TIME_SYNC=60000
+
+# How many devices are connected
+DEVICES_CONNECTED=1
+
+# Devices configuration.
+
+# Face ID 1 configuration
+FACEID_1_TYPE=ENTRY or EXIT
+FACEID_1_DEVICENAME=your device name
+FACEID_1_USER=your user divice
+FACEID_1_PASS=your password device
+FACEID_1_IP=your ip device
+
+# Face ID 2 configuration
+# FACEID_2_TYPE=
+# FACEID_2_DEVICENAME=
+# FACEID_2_USER=
+# FACEID_2_PASS=
+# FACEID_2_IP=
+
+# Face ID 3 configuration
+# FACEID_3_TYPE=
+# FACEID_3_DEVICENAME=
+# FACEID_3_USER=
+# FACEID_3_PASS=
+# FACEID_3_IP=
+
+# Face ID 4 configuration
+# FACEID_4_TYPE=
+# FACEID_4_DEVICENAME=
+# FACEID_4_USER=
+# FACEID_4_PASS=
+# FACEID_4_IP=
+
+# End Devices configuration
+
+# Enable (1) Disable (0) the emition of a test event to the clients
+TEST_MODE=0
+
+#URL_API
+URL_API=https://url_api
+API_USERNAME=yourApiUser
+API_PASSWORD=yourApiPassword
+
+#Nombre:Dockerfile:
+FROM node:18.18-alpine3.18 
+
+WORKDIR /app
+COPY . .
+
+EXPOSE 3888
+
+RUN npm install
+
+# tzdata for timzone
+RUN apk add --no-cache tzdata
+ 
+# timezone env with default
+ENV TZ=America/Argentina/Buenos_Aires
+
+CMD ["node", "/app/index.js"]
+
+#Nombre:index.js
+import "./loadEnv.js"; // Import enviroments variables
+import express from "express";
+import { Server } from "socket.io";
+import { routes, socketEvent} from "./events/events.js";
+import { getAuthorizations } from "./sync/sync.js";
+import fs from "fs";
+import moment from "moment";
+
+let listenPort = process.env.PORT;
+const tymeSync = process.env.TIME_SYNC;
+
+// App setup
+const app = express();
+const server = app.listen(listenPort, function () {
+  console.log("listening for requests on port " + listenPort + "...");
+});
+
+// Socket setup & pass server
+const io = new Server(server);
+
+app.use(express.json());
+app.use(routes(io));
+
+const onConnection = (socket) => {
+  console.info(`Client connected [id=${socket.id}]`);
+  initInterval(io, socket);
+  socketEvent(io, socket);
+  
+};
+
+io.on("connection", onConnection);
+
+//getAuthorizations();
+initSync();
+
+function initInterval(io, socket) {
+  if (process.env.TEST_MODE == 1) {
+    var test_event = "entry";
+
+    setInterval(() => {
+      if (test_event == "entry") {
+        fs.readFile("./event_test_entry.json", "utf8", function (err, data) {
+          if (err) throw err;
+          // obj = JSON.parse(data);
+          console.log("Send ENTRY event");
+          socket.emit("accessControlEvent", data);
+          test_event = "exit";
+        });
+      } else {
+        fs.readFile("./event_test_exit.json", "utf8", function (err, data) {
+          if (err) throw err;
+          // obj = JSON.parse(data);
+          console.log("Send EXIT event");
+          socket.emit("accessControlEvent", data);
+          test_event = "entry";
+        });
+      }
+    }, 10000);
+  }
+}
+
+function initSync() {
+ 
+  if (tymeSync > 0) {
+
+    console.log("Synchronization enabled.");
+    
+    setInterval(() => {
+      console.log("Getting auths..." + moment().format('YYYY-MM-DD HH:mm:ss'));  
+      getAuthorizations();
+
+    }, tymeSync);
+
+  } else {
+    console.log("Synchronization disabled.");
+  }
+}
+
+#Nombre:loadEnv.js
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+const devices_connected = parseInt(process.env.DEVICES_CONNECTED, 10);
+
+var devices = [];
+var gates = [];
+
+for(let i = 1; i <= devices_connected; i++) {
+    
+    const devicename_key = "FACEID_" + i +"_DEVICENAME";
+    const devicename = process.env[devicename_key];
+    
+    gates.push(devicename);
+
+    devices[devicename] = {
+        "type": process.env["FACEID_" + i + "_TYPE"],
+        "name": process.env["FACEID_" + i + "_DEVICENAME"],
+        "username": process.env["FACEID_" + i + "_USER"],
+        "password": process.env["FACEID_" + i + "_PASS"],
+        "ip": process.env["FACEID_" + i + "_IP"]
+    }
+
+}
+
+export {devices, gates};
+
+#Nombre: package.json{
+    "name": "local-access-control-be",
+    "type": "module",
+    "version": "1.0.0",
+    "description": "Local access control nack end",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "devDependencies": {
+      "nodemon": "^3.0.1"
+    },
+    "dependencies": {
+      "digest-fetch": "^3.1.0",
+      "dotenv": "^16.3.1",
+      "express": "^4.18.2",
+      "formidable": "^3.5.0",
+      "fs": "^0.0.1-security",
+      "get-content": "^1.0.2",
+      "moment": "^2.29.4",
+      "multer": "^1.4.5-lts.1",
+      "node-fetch": "^3.3.2",
+      "node-json-db": "^2.2.0",
+      "os": "^0.1.2",
+      "request-digest": "^1.0.13",
+      "socket.io": "^4.7.2"
+    }
+  }
+
+#Nombre: /events/accessControlEvent.js
+
+export default class AccessControlEvent {
+   
+    id = '';
+	name = '';
+	lote = '';
+	UF = '';
+    category_id = '';
+    event_type = '';
+    id_barrio = process.env.ID_BARRIO;
+    picture = '';
+    
+    constructor(id, name, lote, uf, event_type, category_id) {
+        this.id = id;
+        this.name = name;
+        this.lote = lote;
+        this.UF = uf;
+        this.category_id = category_id;
+        this.event_type = event_type;
+    }
+
+    setPicture(newPicture){
+        this.picture = newPicture;
+    }  
+
+};
+
+#Nombre: /events/accessControlEvent.js
+
+import { devices } from "../loadEnv.js";
+import { Router } from "express";
+//import { IncomingForm } from "formidable";
+import { getUser, processUser } from "../faceid/faceIDController.js";
+import { downloadImage } from "../utils/utils.js";
+import fs from "fs";
+import multer  from "multer";
+
+const multiform = multer({ dest: 'uploads/' })
+
+const router = new Router();
+
+const routes = (io) => {
+  //THIS IS JUST A SAMPLE ENDPOINT TO AVOID USING POSTMAN
+  router.get("/event", async (req, res) => {
+    //await db.push("/test1", Math.random());
+    await db.push("/test2/my/test", 5);
+
+    io.sockets.emit("test", { test: true });
+    res.json({
+      test: true,
+    });
+  });
+
+  router.get("/events", async (req, res) => {
+    //TODO: SIMPLESOLUTIONS SERVER IS GONNA CALL IT AND SYNC WITH MYSQL DATABASE
+    //DELETE LOGS
+  });
+
+  //THIS IS CALLED FROM SIMPLESOLUTIONS SERVER
+  //POST http://198.121.123.113:3333/auth
+  //API-KEY
+  router.post("/auth", async (req, res) => {
+    if (req.method === "POST") {
+      // Handle post info...
+      const fields = req.body;
+
+      const userInfo = {
+        document: fields.document.toString(),
+        fullname: fields.name + " " + fields.lastname,
+        beginTime: fields.date_from + "T" + fields.hour_from,
+        endTime: fields.date_to + "T" + fields.hour_to,
+        uf: fields.uf.toString(),
+        lote: fields.lote.toString(),
+        eventType: fields.event_type.toString(),
+        image_url: fields.image_url.toString(),
+      };
+
+      downloadImage(userInfo.image_url, `./images/${userInfo.document}.jpg`);
+
+      const response = await processUser(userInfo);
+
+      if (response) {
+        
+        res.statusCode = 200;
+        res.json({
+          status: true,
+        });
+
+      } else {
+
+        res.statusCode = 400;
+        res.json({
+          status: false,
+        });
+
+      }
+    }
+  });
+
+  //THIS IS CALLED FROM THE FACE ID
+  //POST http://198.xxx.xxx.xxx:3888/event
+
+  router.post("/event", multiform.single('Picture'), async (req, res) => {
+
+    try {
+
+      if (req.method === "POST") {
+        // Handle post info...
+        
+        console.log(req.body.event_log);
+
+        // const formData = new IncomingForm({});
+        let dni;
+        let eventType;
+        let deviceName;
+
+        const obj = JSON.parse(req.body.event_log);
+        const subEventType = obj.AccessControllerEvent.subEventType;
+        dni = 0;
+
+        if (subEventType == 75) {
+          // 6 --> No Permission
+          // 75 --> Face Authentication Completed
+          // 21 --> Door Unlocked
+          // 22 --> Door Locked
+
+          deviceName = obj.AccessControllerEvent.deviceName; // Acording to deviceName the type of event is defined
+          eventType = devices[deviceName].type; // Get device type ENTRY or EXIT
+          dni = obj.AccessControllerEvent.employeeNoString;
+
+          // Renombrar el archivo descargado
+          // var old_name = req.file.destination + req.file.filename;
+          // var new_name = req.file.destination + dni + ".jpeg";
+          
+          // fs.rename(old_name, new_name, (err) => {
+          //   if (err) throw err;
+          //   console.log('Rename complete!');
+          // });
+
+          // fs.unlink(old_name, (err) => {
+          //   if (err) throw err;
+          //   console.log(old_name+ ' was deleted');
+          // });
+          
+          await getUser(dni, deviceName, eventType, io);
+
+        }
+
+        res.end("ok");
+
+      }
+    
+    } catch (error) {
+      console.error("Error reciving event", error);
+      return false;
+    }
+
+  });
+
+  router.post("/test", async (req, res) => {
+    const result = await getUser(req.body.dni, "ENTRY", io);
+
+    res.send(result);
+  });
+
+  return router;
+};
+
+//WE DON'T NEED TO USE THIS RIGHT NOW, JUST AN EXAMPLE
+const socketEvent = (io, socket) => {
+  socket.on("test", () => {
+    console.log("someone sends a test to the server");
+  });
+};
+
+export { routes, socketEvent};
